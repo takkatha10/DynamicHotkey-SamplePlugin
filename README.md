@@ -1,0 +1,2 @@
+# DynamicHotkey-SamplePlugin
+DynamicHotkey用プラグインのサンプル
