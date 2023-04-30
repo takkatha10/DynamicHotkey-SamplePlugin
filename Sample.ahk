@@ -24,18 +24,18 @@ class Sample	; クラス名はファイル名と同じ名前にする必要が�
 	*/
 	__New()
 	{
-		If (Sample.instance)										; クラスインスタンスが存在するかどうかのチェック
+		If (Sample.instance)											; クラスインスタンスが存在するかどうかのチェック
 		{
-			OnMessage(HotkeyData.KM_NEW, Sample.instance.funcNew)	; クラスインスタンスが存在するなら、NEWメッセージを受信した時に実行する関数オブジェクトの登録
-			Return Sample.instance									; クラスインスタンスを返す（この時点でこれを実行しているthisインスタンスの参照がなくなる）
+			OnMessage(DHKMessages.HOTKEY_NEW, Sample.instance.funcNew)	; クラスインスタンスが存在するなら、NEWメッセージを受信した時に実行する関数オブジェクトの登録
+			Return Sample.instance										; クラスインスタンスを返す（この時点でこれを実行しているthisインスタンスの参照がなくなる）
 		}
-		Sample.instance := this 									; クラスインスタンスが存在しないなら、thisインスタンスをクラスインスタンスに設定する
-		str := "Hello, World!"										; 出力する文字列を設定する
-		this.Private_SetStr(str)									; 文字列を設定するプライベートメソッドの呼び出し
-		this.funcNew := ObjBindMethod(this, "Private_New")			; メソッドをバインド
-		this.funcDelete := ObjBindMethod(this, "Private_Delete")	; 〃
-		OnMessage(HotkeyData.KM_NEW, this.funcNew)					; NEWメッセージを受信した時に実行する関数オブジェクトの登録
-		OnMessage(HotkeyData.KM_DELETE, this.funcDelete)			; DELETEメッセージを受信した時に実行する関数オブジェクトの登録
+		Sample.instance := this 										; クラスインスタンスが存在しないなら、thisインスタンスをクラスインスタンスに設定する
+		str := "Hello, World!"											; 出力する文字列を設定する
+		this.Private_SetStr(str)										; 文字列を設定するプライベートメソッドの呼び出し
+		this.funcNew := ObjBindMethod(this, "Private_New")				; メソッドをバインド
+		this.funcDelete := ObjBindMethod(this, "Private_Delete")		; 〃
+		OnMessage(DHKMessages.HOTKEY_NEW, this.funcNew)					; NEWメッセージを受信した時に実行する関数オブジェクトの登録
+		OnMessage(DHKMessages.HOTKEY_DELETE, this.funcDelete)			; DELETEメッセージを受信した時に実行する関数オブジェクトの登録
 	}
 
 	/*
@@ -69,7 +69,7 @@ class Sample	; クラス名はファイル名と同じ名前にする必要が�
 
 	/*
 		プライベートメソッド
-		
+
 		ホットキーに割り当てない関数
 		プライベートメソッドはメソッド名に"Private_"という接頭辞をつける必要がある
 	*/
@@ -82,32 +82,32 @@ class Sample	; クラス名はファイル名と同じ名前にする必要が�
 	; NEWメッセージを受信した時に実行する
 	Private_New(wParam, lParam)
 	{
-		key := Object(lParam).GetKey()					; パラメーターにはホットキーオブジェクトのアドレスが入っており、そこからオブジェクトを取得し、辞書キーを取り出す
-		If (this.selfKeys.HasKey(key))					; 自身の辞書キーの一覧に辞書キーが存在するかどうかのチェック
+		key := Object(lParam).GetKey()						; パラメーターにはホットキーオブジェクトのアドレスが入っており、そこからオブジェクトを取得し、辞書キーを取り出す
+		If (this.selfKeys.HasKey(key))						; 自身の辞書キーの一覧に辞書キーが存在するかどうかのチェック
 		{
-			Return										; 辞書キーが存在するなら、何もしない
+			Return											; 辞書キーが存在するなら、何もしない
 		}
-		this.selfKeys[key] := True						; 辞書キーが存在しないなら、新たに登録する
-		OnMessage(HotkeyData.KM_NEW, this.funcNew, 0)	; NEWメッセージに対する関数オブジェクトの登録を解除
+		this.selfKeys[key] := True							; 辞書キーが存在しないなら、新たに登録する
+		OnMessage(DHKMessages.HOTKEY_NEW, this.funcNew, 0)	; NEWメッセージに対する関数オブジェクトの登録を解除
 	}
 
 	; DELETEメッセージを受信した時に実行する
 	Private_Delete(wParam, lParam)
 	{
-		key := Object(lParam).GetKey()						; 辞書キーを取り出す
-		If (!this.selfKeys.HasKey(key))						; 自身の辞書キーの一覧に辞書キーが存在するかどうかのチェック
+		key := Object(lParam).GetKey()								; 辞書キーを取り出す
+		If (!this.selfKeys.HasKey(key))								; 自身の辞書キーの一覧に辞書キーが存在するかどうかのチェック
 		{
-			Return											; 辞書キーが存在しないなら、何もしない
+			Return													; 辞書キーが存在しないなら、何もしない
 		}
-		this.selfKeys.Delete(key)							; 辞書キーが存在するなら、その辞書キーを削除する
-		If (this.selfKeys.Count())							; 自身の辞書キーの数のチェック
+		this.selfKeys.Delete(key)									; 辞書キーが存在するなら、その辞書キーを削除する
+		If (this.selfKeys.Count())									; 自身の辞書キーの数のチェック
 		{
-			Return											; 辞書キーが残っているなら、何もしない
+			Return													; 辞書キーが残っているなら、何もしない
 		}
-		OnMessage(HotkeyData.KM_NEW, this.funcNew, 0)		; 辞書キーが残っていないなら、NEWメッセージに対する関数オブジェクトの登録を解除
-		OnMessage(HotkeyData.KM_DELETE, this.funcDelete, 0)	; DELETEメッセージに対する関数オブジェクトの登録を解除
-		this.funcNew := ""									; メソッドのバインドを解除
-		this.funcDelete := ""								; 〃
-		Sample.instance := ""								; クラスインスタンスを削除（この時点でクラスインスタンスの参照がなくなる）
+		OnMessage(DHKMessages.HOTKEY_NEW, this.funcNew, 0)			; 辞書キーが残っていないなら、NEWメッセージに対する関数オブジェクトの登録を解除
+		OnMessage(DHKMessages.HOTKEY_DELETE, this.funcDelete, 0)	; DELETEメッセージに対する関数オブジェクトの登録を解除
+		this.funcNew := ""											; メソッドのバインドを解除
+		this.funcDelete := ""										; 〃
+		Sample.instance := ""										; クラスインスタンスを削除（この時点でクラスインスタンスの参照がなくなる）
 	}
 }
